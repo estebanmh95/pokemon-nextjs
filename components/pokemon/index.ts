@@ -1,2 +1,3 @@
-export { default as PokemonCard } from "./PokemonCard/index";
-export { default as PokemonDetail } from "./PokemonDetail/index";
+export { default as PokemonCard } from "./PokemonCard";
+export { default as PokemonDetail } from "./PokemonDetail";
+export { default as PokemonListFav } from "./PokemonListFav";

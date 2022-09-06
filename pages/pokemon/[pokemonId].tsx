@@ -17,7 +17,7 @@ interface Props {
 
 const PokemonPage: NextPage<Props> = (props) => {
 	return (
-		<Layout title="Algun pokemon">
+		<Layout title={`#${props.id} - ${props.name}`}>
 			<PokemonDetail pokemon={props} />
 		</Layout>
 	);

@@ -1,9 +1,10 @@
 import { Button, Card, Container, Grid, Text } from "@nextui-org/react";
 import Image from "next/image";
-import React, { FC } from "react";
+import React, { FC, useEffect, useState } from "react";
 import { Sprites } from "../../../interfaces/pokemon";
+import confetti from "canvas-confetti";
 
-interface Pokemon {
+export interface Pokemon {
 	id: string;
 	height: string;
 	name: string;
@@ -16,6 +17,40 @@ interface Props {
 	pokemon: Pokemon;
 }
 const PokemonDetail: FC<Props> = ({ pokemon }) => {
+	const [favPokemons, setFavPokemons] = useState(null);
+
+	useEffect(() => {
+		const favPokemonClient = JSON.parse(
+			localStorage.getItem("favorites") || "{}"
+		);
+		setFavPokemons(favPokemonClient);
+	}, []);
+
+	const handleFavoriteClick = () => {
+		const favPokemon = JSON.parse(localStorage.getItem("favorites") || "{}");
+		if (favPokemon[pokemon.id]) {
+			delete favPokemon[pokemon.id];
+			localStorage.setItem("favorites", JSON.stringify(favPokemon));
+			setFavPokemons(favPokemon);
+		} else {
+			confetti({
+				zIndex: 999,
+				particleCount: 100,
+				spread: 160,
+				angle: -100,
+				origin: {
+					x: 1,
+					y: 0,
+				},
+			});
+			localStorage.setItem(
+				"favorites",
+				JSON.stringify({ ...favPokemon, [pokemon.id]: pokemon })
+			);
+			setFavPokemons({ ...favPokemon, [pokemon.id]: pokemon });
+		}
+	};
+
 	return (
 		<Grid.Container
 			css={{
@@ -48,8 +83,14 @@ const PokemonDetail: FC<Props> = ({ pokemon }) => {
 							{pokemon.name}
 						</Text>
 
-						<Button color={"gradient"} ghost>
-							Guardar en favoritos
+						<Button
+							color={"gradient"}
+							ghost={!(!!favPokemons && favPokemons[pokemon.id])}
+							onClick={handleFavoriteClick}
+						>
+							{!!favPokemons && favPokemons[pokemon.id]
+								? "En Favoritos"
+								: "Guardar en favoritos"}
 						</Button>
 					</Card.Header>
 					<Card.Body>
