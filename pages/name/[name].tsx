@@ -1,10 +1,10 @@
-import { useRouter } from "next/router";
-import React, { useEffect, useState } from "react";
+import { GetStaticProps, NextPage } from "next";
+import React from "react";
 import { pokeApi } from "../../api";
 import { Layout } from "../../components/layouts";
+import { PokemonDetail } from "../../components/pokemon";
 import { DetailedPokemon, Sprites } from "../../interfaces/pokemon";
-import { GetStaticProps, NextPage } from "next";
-import { PokemonCard, PokemonDetail } from "../../components/pokemon";
+import { PokemonAPI } from "../../interfaces/pokemon-list";
 import { getPokemon } from "../../utils/getPokemon";
 
 interface Props {
@@ -16,7 +16,7 @@ interface Props {
 	img: string;
 }
 
-const PokemonPage: NextPage<Props> = (props) => {
+const PokemonByNamePage: NextPage<Props> = (props) => {
 	return (
 		<Layout title={`#${props.id} - ${props.name}`}>
 			<PokemonDetail pokemon={props} />
@@ -25,9 +25,11 @@ const PokemonPage: NextPage<Props> = (props) => {
 };
 
 export async function getStaticPaths<GetStaticPaths>() {
-	const pokemons151 = [...Array(151)].map((value, idx) => {
+	const { data } = await pokeApi.get<PokemonAPI>("/pokemon?limit=151");
+
+	const pokemons151 = data.results.map((value, idx) => {
 		return {
-			params: { pokemonId: String(idx + 1) },
+			params: { name: value.name },
 		};
 	});
 
@@ -37,15 +39,15 @@ export async function getStaticPaths<GetStaticPaths>() {
 	};
 }
 export const getStaticProps: GetStaticProps = async ({ params }) => {
-	const { pokemonId } = params as { pokemonId: string };
-	const pokemon: DetailedPokemon = await getPokemon(pokemonId);
-	const { id, height, name, sprites, weight } = pokemon;
+	const { name } = params as { name: string };
+	const pokemon: DetailedPokemon = await getPokemon(name);
+	const { id, height, name: pokemonName, sprites, weight } = pokemon;
 
 	return {
 		props: {
 			id,
 			height,
-			name,
+			name: pokemonName,
 			sprites,
 			weight,
 			img: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/${id}.svg`,
@@ -53,4 +55,4 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
 	};
 };
 
-export default PokemonPage;
+export default PokemonByNamePage;
