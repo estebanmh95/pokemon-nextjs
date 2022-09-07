@@ -35,12 +35,20 @@ export async function getStaticPaths<GetStaticPaths>() {
 
 	return {
 		paths: pokemons151,
-		fallback: false,
+		fallback: "blocking",
 	};
 }
 export const getStaticProps: GetStaticProps = async ({ params }) => {
 	const { name } = params as { name: string };
-	const pokemon: DetailedPokemon = await getPokemon(name);
+	const pokemon: DetailedPokemon | null = await getPokemon(name.toLowerCase());
+	if (!pokemon) {
+		return {
+			redirect: {
+				destination: "/",
+				permanent: false,
+			},
+		};
+	}
 	const { id, height, name: pokemonName, sprites, weight } = pokemon;
 
 	return {
@@ -52,6 +60,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
 			weight,
 			img: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/${id}.svg`,
 		},
+		revalidate: 86400,
 	};
 };
 
